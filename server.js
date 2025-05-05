@@ -10,7 +10,13 @@ import channelRoutes from './routes/channelRoutes.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// Enable CORS with credentials and specific origin
+app.use(cors({
+  origin: 'http://localhost:3000',  // frontend origin
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
