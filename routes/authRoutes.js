@@ -5,24 +5,43 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
+// REGISTER
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ username, email, password: hashedPassword });
-  await user.save();
-  res.status(201).send(user);
+  try {
+    const { username, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ error: 'Email already in use' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, email, password: hashedPassword });
+    await user.save();
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+
+    res.status(201).json({ token, user });
+  } catch (err) {
+    res.status(500).json({ error: 'Registration failed' });
+  }
 });
 
+// LOGIN
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).send('User not found');
+  try {
+    const { email, password } = req.body;
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.status(400).send('Invalid password');
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: 'User not found' });
 
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-  res.send({ token, user });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: 'Invalid credentials' });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+
+    res.json({ token, user });
+  } catch (err) {
+    res.status(500).json({ error: 'Login failed' });
+  }
 });
 
 export default router;
