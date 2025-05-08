@@ -5,7 +5,7 @@ import { authenticate } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const videos = await Video.find().populate('uploader');
+  const videos = await Video.find().limit(50).sort({ uploadDate: -1 }).populate('uploader');
   res.send(videos);
 });
 
