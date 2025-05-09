@@ -6,7 +6,6 @@ const videoSchema = new mongoose.Schema({
   videoUrl: String,
   description: String,
   channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' },
-  uploader: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   views: Number,
   likes: Number,
   dislikes: Number,

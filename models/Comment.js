@@ -6,3 +6,6 @@ const commentSchema = new mongoose.Schema({
   text: String,
   timestamp: { type: Date, default: Date.now },
 });
+
+const Comment = mongoose.model('Comment', commentSchema);
+export default Comment;
