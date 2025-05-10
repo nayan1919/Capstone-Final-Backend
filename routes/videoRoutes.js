@@ -1,14 +1,20 @@
 import express from 'express';
 import Video from '../models/Video.js';
 import { authenticate } from '../middleware/authMiddleware.js';
-import { uploadVideo } from '../controllers/videoController.js'; // ✅ IMPORT THIS
+import { uploadVideo } from '../controllers/videoController.js';
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const videos = await Video.find().limit(50).sort({ uploadDate: -1 }).populate('uploader');
-  res.send(videos);
+  try {
+    const videos = await Video.find().limit(50).sort({ uploadDate: -1 }).populate('uploader');
+    res.send(videos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
+
+
 
 router.post('/upload', authenticate, uploadVideo);
 

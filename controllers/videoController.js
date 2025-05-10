@@ -36,7 +36,7 @@ export const uploadVideo = async (req, res) => {
       videoUrl,
       thumbnailUrl,
       channelId,
-      // uploader: req.user.id, // from auth middleware
+      uploader: req.user.id, // from auth middleware
       uploadDate: new Date(),
       views: 0,
       likes: 0,
