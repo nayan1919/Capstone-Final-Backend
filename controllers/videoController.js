@@ -1,9 +1,12 @@
-import Video from '../models/Video.js'; // Make sure Video is imported correctly
+import Video from '../models/Video.js';
 import Channel from '../models/Channel.js';
 
 export const getVideos = async (req, res) => {
   try {
-    const videos = await Video.find();
+    const videos = await Video.find()
+      .limit(50)
+      .sort({ uploadDate: -1 })
+      .populate('uploader', 'username'); // ✅ Fix here
     res.status(200).json(videos);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -12,7 +15,8 @@ export const getVideos = async (req, res) => {
 
 export const getVideoById = async (req, res) => {
   try {
-    const video = await Video.findById(req.params.id);
+    const video = await Video.findById(req.params.id)
+      .populate('uploader', 'username'); // ✅ Fix here
     if (!video) return res.status(404).json({ error: 'Video not found' });
     res.status(200).json(video);
   } catch (err) {
@@ -36,7 +40,7 @@ export const uploadVideo = async (req, res) => {
       videoUrl,
       thumbnailUrl,
       channelId,
-      uploader: req.user.id, // from auth middleware
+      uploader: req.user.id, // ✅ Ensure this is correct (comes from your auth middleware)
       uploadDate: new Date(),
       views: 0,
       likes: 0,
@@ -45,7 +49,6 @@ export const uploadVideo = async (req, res) => {
 
     await video.save();
 
-    // Push video ID to the corresponding channel
     await Channel.findByIdAndUpdate(channelId, {
       $push: { videos: video._id },
     });
@@ -54,4 +57,5 @@ export const uploadVideo = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+
 };
